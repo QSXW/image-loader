@@ -7,25 +7,29 @@
 
 typedef void* tjhandle;
 
-extern "C" tjhandle tjInitDecompress(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern "C" tjhandle tjInitCompress(void);
+tjhandle tjInitDecompress(void);
 
-extern "C" int tjDestroy(tjhandle);
+tjhandle tjInitCompress(void);
 
-extern "C" const char *tjGetErrorStr2(tjhandle);
+int tjDestroy(tjhandle);
 
-extern "C" int tjDecompressWithCropping(tjhandle handle, const unsigned char *jpegBuf,
+const char *tjGetErrorStr2(tjhandle);
+
+int tjDecompressWithCropping(tjhandle handle, const unsigned char *jpegBuf,
                                         unsigned long jpegSize, unsigned char *dstBuf,
                                         int width, int pitch, int height, int cropX,
                                         int cropY, int pixelFormat, int flags);
 
-extern "C" int tjCompress2(tjhandle handle, const unsigned char *srcBuf,
+int tjCompress2(tjhandle handle, const unsigned char *srcBuf,
                            int width, int pitch, int height, int pixelFormat,
                            unsigned char **jpegBuf, unsigned long *jpegSize,
                            int jpegSubsamp, int jpegQual, int flags);
 
-extern "C" int decompress_image(Image *image, const uint8_t *data, size_t size, CropRect *rect)
+IMAGE_LOADER_API int decompress_image(Image *image, const uint8_t *data, size_t size, CropRect *rect)
 {
     tjhandle handle = tjInitDecompress();
     if (!handle)
@@ -75,13 +79,15 @@ extern "C" int decompress_image(Image *image, const uint8_t *data, size_t size, 
     return DECOMPRESS_SUCCESS;
 }
 
-extern "C" int compress_image(uint8_t **pData, size_t *size, Image *image)
+IMAGE_LOADER_API int compress_image(uint8_t **pData, size_t *size_, Image *image)
 {
     tjhandle handle = tjInitCompress();
     if (!handle)
     {
         throw("Unable to init decompression context");
     }
+
+    unsigned long size = *size_;
 
     int err = tjCompress2(handle,
         image->buffer(),
@@ -90,10 +96,11 @@ extern "C" int compress_image(uint8_t **pData, size_t *size, Image *image)
         image->Height,
         PixelFormat::RGBA,
         pData,
-        size,
+        &size,
         1, 100, 0
         );
 
+    *size_ = size;
     if (err)
     {
         auto error = tjGetErrorStr2(handle);
@@ -106,3 +113,7 @@ extern "C" int compress_image(uint8_t **pData, size_t *size, Image *image)
 
     return COMPRESS_SUCCESS;
 }
+
+#ifdef __cplusplus
+}
+#endif

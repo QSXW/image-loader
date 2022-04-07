@@ -8,6 +8,12 @@
 #include <vector>
 #include <memory>
 
+#ifdef _MSC_VER
+#define IMAGE_LOADER_API __declspec(dllexport)
+#else
+#define IMAGE_LOADER_API __attribute__((visibility("default")))
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -60,9 +66,9 @@ private:
     std::unique_ptr<uint8_t> data;
 };
 
-int decompress_image(Image *image, const uint8_t *data, size_t size, CropRect *rect);
+IMAGE_LOADER_API int decompress_image(Image *image, const uint8_t *data, size_t size, CropRect *rect);
 
-int compress_image(uint8_t **pData, size_t *size, Image *image);
+IMAGE_LOADER_API int compress_image(uint8_t **pData, size_t *size, Image *image);
 
 #ifdef __cplusplus
 }

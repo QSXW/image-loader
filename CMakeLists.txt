@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 
 project("image-loader" LANGUAGES CXX)
 
@@ -23,3 +23,10 @@ install(TARGETS ${PROJECT_NAME} EXPORT ${CMAKE_PROJECT_NAME}Targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+set(EXAMPLE_NAME "image-loader-example")
+add_executable(${EXAMPLE_NAME}
+    example.cpp)
+
+target_link_libraries(${EXAMPLE_NAME} PUBLIC
+    $<$<CXX_COMPILER_ID:GNU>:dl>)
